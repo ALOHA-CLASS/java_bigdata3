@@ -6,7 +6,7 @@ package human;
  * 자바 프로그램 첫번째 예제
  * @author h
  * 
- */
+ */           
 public class Test {	
 	// 클래스 선언 : public class 클래스명 { }
 	// * 클래스 이름은 클래스 파일 이름과 일치해야한다.
