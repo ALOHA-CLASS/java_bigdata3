@@ -3,6 +3,7 @@ package Day09.BookStore;
 import java.text.MessageFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -33,7 +34,20 @@ public class Main {
 			// 메뉴 출력
 			showMenu();
 			
-			int menuNo = sc.nextInt();
+			int menuNo = 0;
+			
+			// 잘못된 입력 시, 에외 처리
+			try {
+				menuNo = sc.nextInt();
+			} catch (InputMismatchException e) {
+				sc.nextLine();		// 잘못 입력된 값을 입력버퍼에서 비워준다
+				System.err.println("(0~7) 사이의 숫자를 입력해주세요");
+				continue;	// 다시 입력하도록 반복문 처음으로 돌아감
+			} catch (Exception e) {
+				System.err.println("알 수 없는 오류로 프로그램을 종료합니다");
+				break;
+			}
+			
 			System.out.println(menuNo + "번 메뉴를 선택!");
 			
 			// 유효한 메뉴번호 검사
@@ -134,9 +148,17 @@ public class Main {
 	public static void cartClear() {
 		System.out.println("********** 장바구니 비우기 **********");
 		
+		// 장바구니에 항목이 없을 때,
+		if( cartCount == 0 ) {
+			System.out.println("장바구니에 추가된 항목이 없습니다.");
+			return;  // 메소드 종료
+		}
+		
+		// 장바구니의 모든 항목을 null로 지정 (삭제)
 		for (int i = 0; i < cartCount; i++) {
 			cartList[i] = null;
 		}
+		// 장바구니 항목 개수 0
 		cartCount = 0;
 		System.out.println("장바구니 목록을 비웠습니다");
 	}
@@ -242,6 +264,13 @@ public class Main {
 	 */
 	public static void cartRemove() {
 		System.out.println("********** 장바구니 항목 삭제 **********");
+		
+		// 장바구니에 항목이 없을 때,
+		if( cartCount == 0 ) {
+			System.out.println("장바구니에 추가된 항목이 없습니다.");
+			return;  // 메소드 종료
+		}
+		
 		System.out.print("삭제할 장바구니 항목의 ISBN : ");
 		Scanner sc = new Scanner(System.in);
 		String bookId = sc.nextLine();
@@ -249,14 +278,25 @@ public class Main {
 		Cart[] newCartList = new Cart[BOOK_COUNT];
 		int index = 0;
 		
+		boolean removed = false;
 		for (int i = 0; i < cartCount; i++) {
 			if( !bookId.equals(cartList[i].getBookID() ) ) {
 				newCartList[index] = cartList[i];
 				index++;
 			} else {
-				System.out.println(bookId + " 를 장바구니에서 삭제하였습니다");
+				// 삭제 
+				removed = true;
 			}
 		}
+		
+		if( removed ) {
+			// 해당 항목을 장바구니에서 삭제했을 때
+			System.out.println(bookId + " 를 장바구니에서 삭제하였습니다");
+		} else {
+			// 해당 항목이 장바구니에 없을 때 
+			System.out.println(bookId + " 는 장바구니에 존재하지 않습니다");
+		}
+		
 		cartCount = index;
 		cartList = newCartList;
 	}
@@ -356,6 +396,13 @@ public class Main {
 	 * @param person
 	 */
 	public static void printBill(Person person) {
+		
+		// 장바구니에 항목이 없을 때,
+		if( cartCount == 0 ) {
+			System.out.println("장바구니에 추가된 항목이 없습니다.");
+			return;  // 메소드 종료
+		}
+		
 		Date date = new Date();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
 		String day = sdf.format(date);
