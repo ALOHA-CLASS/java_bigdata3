@@ -13,6 +13,9 @@ import java.sql.Statement;
  *  - getConnection( URL, DB계정, DB패스워드 )
  *    : DB에 연결을 하고, DB와 연결을 관리하는 객체인 Connection을 반환
  *    
+ *  Connection
+ *  : 연결된 드라이버에 SQL을 요청할 객체를 생성하는 클래스
+ *    
  *  데이터베이스 사용에 필요한 클래스
  *  - Statement			 	: SQL을 실행하기 위해 사용하는 클래스
  *    * executeQuery(sql)	: 지정한 sql(SELECT) 을 실행하고 결과를 ResultSet 객체로 반환
