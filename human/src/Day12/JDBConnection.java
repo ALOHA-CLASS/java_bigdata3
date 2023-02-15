@@ -24,7 +24,7 @@ import java.sql.Statement;
  *   								  PrepareStatement 객체를 반환
  *   * String sql = "INSERT INTO board ( ~ ) VALUES ( ?, ?, ? )";
  *   * ? 파라미터에 매핑할 값을 setXXX() 메소드로 지정하여 사용할 수 있다
- *   * - 객체.setXXX( 매핑할 값 ) 
+ *   * - 객체.setXXX(순서, 매핑할 값) 
  *   * 객체.executeQuery()	: Statement 와 동일
  *   * 객체.executeUpdate()	: Statement 와 동일
  *   

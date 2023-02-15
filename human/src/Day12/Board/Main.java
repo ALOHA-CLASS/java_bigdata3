@@ -1,8 +1,11 @@
 package Day12.Board;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
 
+import Day12.Board.DAO.BoardDAO;
 import Day12.Board.DTO.Board;
 
 /**
@@ -17,83 +20,170 @@ import Day12.Board.DTO.Board;
  *
  */
 public class Main {
-	
-	static int max = 10;			// 게시글 최대 10개 제한
-	static Board[] boardList = new Board[max];
-	static int index = 0;			// 현재 게시글 순서번호(0~max-1)
+
+	static Board board;							// 게시글
+	static List<Board> boardList;				// 게시글 목록
+	static Scanner sc = new Scanner(System.in);	// 입력 객체 생성
+	static BoardDAO dao = new BoardDAO();		// 데이터 접근 객체 생성
 	
 	// 메뉴판
-	public static void showMenu() {
-		System.out.println("########## 메뉴판 ##########");
-		System.out.println("1. 게시글 목록");
-		System.out.println("2. 게시글 읽기");
-		System.out.println("3. 게시글 쓰기");
-		System.out.println("4. 게시글 수정");
-		System.out.println("5. 게시글 삭제");
-		System.out.println("0. 프로그램 종료");
-		System.out.print("########## 번호 입력 : ");
+	public static void menu() {
+		System.out.println("########## 게시판 ##########");
+		System.out.println("1. 게시글 쓰기");
+		System.out.println("2. 게시글 수정");
+		System.out.println("3. 게시글 삭제");
+		System.out.println("4. 게시글 조회");
+		System.out.println("5. 게시글 목록");
+		System.out.println("0. 종료하기");
+		System.out.print("########## 입력 : ");
 	}
 	
-	// 게시글 목록
-	public static void list() {
-		System.out.println("# 게시글 목록");
+	/**
+	 * 전체 게시글 조회 메소드
+	 * - DAO 객체로 데이터 전체 조회 요청 메소드를 호출한다.
+	 * - List<Board> 타입의 게시글 목록을 가져온다.
+	 * - 게시글 목록 전체 출력 메소드를 호출한다.
+	 */
+	public static void menuList() {
+		System.out.println("########## [전체목록] ##########");
+		boardList = dao.selectList();
+		printAll();
+	}
+	
+	/**
+	 *  게시글 조회 메소드
+	 *  - 조회할 게시글 번호를 입력받는다.
+	 *  - DAO 객체의 데이터 조회 요청 메소드를 호출한다.
+	 *  - Board 객체로 조회된 게시글 정보를 받아온다.
+	 *  - print() 메소드를 호출하여 출력한다.
+	 */
+	public static void menuSelect() {
+		System.out.println("########## [글조회] ##########");
+		
+		System.out.print("게시글 번호 : ");
+		int boardNo = sc.nextInt();
+		sc.nextLine();
+		
+		board = dao.select(boardNo);
+		print(board);
+	}
+	
+	
+	/**
+	 * 게시글 쓰기 메소드
+	 * - 제목, 작성자, 내용을 입력받아 Board 객체를 생성하고
+	 *   DAO 객체의 데이터 삽입 요청 메소드를 호출한다. 
+	 */
+	public static void menuWrite() {
+		System.out.println("########## [글쓰기] ##########");
+		
+		System.out.print("제목 : ");
+		String title = sc.nextLine();
+		
+		System.out.print("작성자 : ");
+		String writer = sc.nextLine();
+		
+		System.out.print("내용 : ");
+		String content = sc.nextLine();
+		
+		board = new Board(title, content, writer);
+		dao.insert(board);		// 데이터 추가 요청
+		
+	}
+	
+	/**
+	 * 게시글 수정 메소드
+	 * - 수정할 게시글 번호를 입력받는다.
+	 * - 제목, 작성자, 내용을 입력받아 Board 객체를 생성한다.
+	 * - DAO 객체의 데이터 수정 메소드를 호출한다.
+	 */
+	public static void menuUpdate() {
+		System.out.println("########## [글수정] ##########");
+		System.out.print("게시글 번호 : ");
+		int boardNo = sc.nextInt();
+		sc.nextLine();
+		
+		System.out.print("제목 : ");
+		String title = sc.nextLine();
+		
+		System.out.print("작성자 : ");
+		String writer = sc.nextLine();
+		
+		System.out.print("내용 : ");
+		String content = sc.nextLine();
+		
+		board = new Board(title, content, writer);
+		board.setBoardNo(boardNo);
+		dao.update(board);			// 데이터 수정 요청
+	}
+
+	
+	/**
+	 *  게시글 삭제 메소드
+	 *  - 삭제할 게시글 번호를 입력받는다.
+	 *  - DAO 객체의 데이터 삭제 요청 메소드를 호출한다.
+	 */
+	public static void menuDelete() {
+		System.out.println("########## [글삭제] ##########");
+		
+		System.out.print("게시글 번호 : ");
+		int boardNo = sc.nextInt();
+		sc.nextLine();
+		
+		dao.delete(boardNo);
+	}
+	
+	/**
+	 * 게시글 출력 메소드
+	 * - Board 타입의 객체를 지정한 문자열 형식에 따라 출력하는 메소드
+	 * 
+	 */
+	private static void print(Board board) {
+		
+		// 게시글 정보가 없으면 출력X
+		if( board == null ) {
+			System.out.println("게시글 정보가 존재하지 않습니다");
+			return;
+		}
+		
+		System.out.println("[게시글 번호 : " + board.getBoardNo() + "] ---------------");
+		System.out.println("-제목 : " + board.getTitle());
+		System.out.println("-작성자 : " + board.getWriter());
+		System.out.println("-내용 : " + board.getContent());
+		
+		String dateFormat = "yyyy/MM/dd hh:mm:ss";
+		SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+		Date reg_date = board.getRegDate();
+		Date upd_date = board.getUpdDate();
+		
+		String regDate = sdf.format( reg_date );
+		String updDate = sdf.format( upd_date );
+		
+		System.out.println("-등록일자 : " + regDate);
+		System.out.println("-수정일자 : " + updDate);
+		System.out.println("-------------------------------");
+	}
+	
+	
+	
+	/**
+	 * 게시글 목록 전체 출력 메소드
+	 * - List<Board> 타입의 게시글 전체 목록을 반복하여,
+	 *   각 객체를 인자로 개별 출력 메소드를 호출한다
+	 */
+	private static void printAll() {
+		
+		if( boardList.isEmpty() ) {
+			System.out.println("존재하는 게시글이 없습니다.");
+			return;
+		}
 		
 		for (Board board : boardList) {
-			if( board == null ) {
-				System.out.println("(게시글 없음)");
-			} else {
-				System.out.println(board);
-			}
+			print(board);
 		}
-	}
-	
-	// 게시글 읽기
-	public static void read(int boardNo) {
-		System.out.println("# 게시글 읽기");
-		Board board = boardList[boardNo-1];
-		System.out.println(board);
-	}
-	
-	// 게시글 쓰기
-	public static void write(Board board) {
-		// 현재 작성한 글 개수가 최대 제한 개수보다 작으면, 글 작성 가능
-		if( index < max ) {
-			boardList[index] = board;
-			index++;
-			board.setBoardNo(index);
-			System.out.println("# 게시글이 작성되었습니다.");
-		}
-		// 그렇지 않으면, 작성 불가
-		else {
-			System.out.println("# 게시글 목록이 꽉 찼습니다.");
-		}
-	}
-	
-	// 게시글 수정
-	public static void update(Board board) {
-		int boardNo = board.getBoardNo();
 		
-		if( boardNo >= 1 && boardNo <= max && boardList[boardNo-1] != null ) {
-			board.setUpdDate( new Date() );		// 수정일자 갱신
-			boardList[boardNo-1] = board;
-			System.out.println("# 게시글이 수정되었습니다.");
-		}
-		else {
-			System.out.println("# 게시글이 존재하지 않습니다.");
-		}
 	}
 	
-	// 게시글 삭제
-	public static void delete(int boardNo) {
-		if( boardNo >= 1 && boardNo <= max ) {
-			// null : 값이 없음
-			boardList[boardNo-1] = null;
-			System.out.println("# 게시글이 삭제되었습니다.");
-		}
-		else {
-			System.out.println("# 게시글이 존재하지 않습니다.");
-		}
-	}
 	
 	public static void main(String[] args) {
 		Scanner sc = new Scanner(System.in);
@@ -102,73 +192,33 @@ public class Main {
 		
 		// 메뉴판을 반복하여 출력
 		do {
-			showMenu();			// 메뉴판 호출
-			
-			// 메뉴번호 입력
-			menuNo = sc.nextInt();	// 1(엔터)
+			menu();				// 메뉴판 호출
+			menuNo = sc.nextInt();	// 메뉴번호 입력
 			sc.nextLine();			// 엔터를 버퍼에서 빼준다.
 			
-			int boardNo = 0;
-			String title = "";
-			String content = "";
-			String writer = "";
-			Board board = null;
+			// 프로그램 종료
+			if( menuNo == 0 ) {
+				System.out.println("프로그램을 종료합니다...");
+				break;
+			}
 			
 			// 메뉴 선택
 			switch (menuNo) {
-				// 게시글 목록
-				case 1:	list();
-						System.out.println("총 게시글 개수 : " + count);
-						break;
-				// 게시글 읽기
-				case 2:	System.out.print("게시글 번호 : ");
-						boardNo = sc.nextInt();	// 1(엔터)
-						sc.nextLine();			// 엔터를 버퍼에서 제거
-						read(boardNo);
-						break;
-				// 게시글 쓰기
-				case 3: 
-						System.out.print("제목 : ");
-						title = sc.nextLine();
-						System.out.print("작성자 : ");
-						writer = sc.nextLine();
-						System.out.print("내용 : ");
-						content = sc.nextLine();
-						board = new Board(title, content, writer);
-						count = index+1;
-						write(board);
-						break;
-				// 게시글 수정
-				case 4:
-						System.out.print("게시글 번호 : ");
-						boardNo = sc.nextInt();
-						sc.nextLine();
-						System.out.print("제목 : ");
-						title = sc.nextLine();
-						System.out.print("작성자 : ");
-						writer = sc.nextLine();
-						System.out.print("내용 : ");
-						content = sc.nextLine();
-						
-						board = boardList[boardNo-1];
-						board.setTitle(title);
-						board.setContent(content);
-						board.setWriter(writer);
-						update(board);
-						break;
-				// 게시글 삭제
-				case 5:
-						System.out.print("게시글 번호 : ");
-						boardNo = sc.nextInt();
-						sc.nextLine();
-						count = index+1;
-						delete(boardNo);
-						break;
-				default:
-						break;
+				case 1:		menuWrite();	// 게시글 쓰기
+							break;
+				case 2:		menuUpdate();	// 게시글 수정
+							break;
+				case 3:		menuDelete();	// 게시글 삭제
+							break;
+				case 4:		menuSelect();	// 게시글 조회
+							break;
+				case 5:		menuList();		// 게시글 목록		
+							break;
+				default:	System.out.println("(0~5) 사이의 숫자를 입력해주세요!");
+							break;
 			}
 			
-		} while (menuNo != 0);
+		} while (true);
 		
 		sc.close();
 	}
